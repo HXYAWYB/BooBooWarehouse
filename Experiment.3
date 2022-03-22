@@ -21,18 +21,10 @@ int main()
 				{
 					count++;
 				}
-				else
-				{
-					count=0;
-					continue;
-				}
-			}
-			if(count==w)
-			{
-				mumber++;
 			}
 		}
 	}
+	mumber=count/w;
 	printf("Frequency of occurrence:%d\n",mumber);
 	return 0;
 }
