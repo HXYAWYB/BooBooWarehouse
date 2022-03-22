@@ -1,0 +1,36 @@
+# BooBooWarehouse
+#include<stdio.h>
+#include<string.h>
+int main()
+{
+	int count=0,s,w,i,j,mumber=0;
+	char ch1[1000],ch2[10];
+	printf("Please input a sentence:\n");
+	strlwr(gets(ch1));
+	printf("Please input a word:\n");
+	strlwr(gets(ch2));
+	s=strlen(ch1);
+	w=strlen(ch2);
+	for(i=0;i<s;i++)
+	{
+		if(ch1[i]==ch2[0])
+		{
+			for(j=0;j<w;j++)
+			{
+				if(ch1[i+j]==ch2[j])
+				{
+					count++;
+				}
+				else
+				{
+					count=0;
+					continue;
+				}
+			}
+		}
+	}
+	mumber=count/w;
+	printf("Frequency of occurrence:%d\n",mumber);
+	return 0;
+}
+
