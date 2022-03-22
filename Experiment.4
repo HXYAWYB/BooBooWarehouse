@@ -1,0 +1,26 @@
+# BooBooWarehouse
+#include<stdio.h>
+int main()
+{
+	char ch;
+	float a,b;
+	scanf("%f",&a);
+	scanf("%c",&ch);
+	scanf("%f",&b);
+	switch(ch)
+	{
+		case '+':
+			printf("%f%c%f=%f\n",a,ch,b,a+b);
+			break;
+		case '-':
+			printf("%f%c%f=%f\n",a,ch,b,a-b);
+			break;
+		case '*':
+			printf("%f%c%f=%f\n",a,ch,b,a*b);
+			break;
+		case '/':
+			printf("%f%c%f=%f\n",a,ch,b,a/b);
+			break;
+	}
+	return 0;
+}
