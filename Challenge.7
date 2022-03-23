@@ -1,0 +1,24 @@
+# BooBooWarehouse
+#include<stdio.h>
+#include<string.h>
+int main()
+{
+	char a[1005][20];
+	int b[1005],i,n;
+	scanf("%d",&n);
+	for(i=0;i<n;i++)
+	{
+		int x1,x2;
+		scanf("%s%d%d",a[0],&x1,&x2);
+		strcpy(a[x1],a[0]);
+		b[x1]=x2;
+	}
+	scanf("%d",&n);
+	for(i=0;i<n;i++)
+	{
+		int x;
+		scanf("%d",&x);
+		printf("%s %d\n",a[x],b[x]);
+	}
+	return 0;
+}
