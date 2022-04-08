@@ -1,0 +1,23 @@
+# BooBooWarehouse
+#include<stdio.h>
+#include<string.h>
+int main()
+{
+	char strExp[]="2*2/4*1/1*2*2*3/2";
+	int a=strExp[0]-'0';
+	int i;
+	for(i=0;i<strlen(strExp);i++)
+	{
+		if(strExp[i]=='*')
+		{
+			a=a*(strExp[i+1]-'0');
+			i++;
+		}
+		else if(strExp[i]=='/')
+		{
+			a=a/(strExp[i+1]-'0');
+			i++;
+		}
+	}
+	printf("a = %d\n",a);
+	return 0;
