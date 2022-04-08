@@ -1,0 +1,12 @@
+# BooBooWarehouse
+#include<stdio.h>
+int main()
+{
+	char strExp[]="3+4";
+	int a=strExp[0]-'0';
+	int b=strExp[2]-'0';
+	int c;
+	c=a+b;
+	printf("%d\n",c);
+	return 0;
+}
