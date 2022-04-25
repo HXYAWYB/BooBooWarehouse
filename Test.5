@@ -1,0 +1,152 @@
+# BooBooWarehouse
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+struct Student
+{
+	int id;
+	char name[1000];
+	int age;
+	struct Student *next;
+};
+
+struct Student *headp=NULL;
+struct Student *tailp=NULL;
+
+void printStudent(struct Student *curp)
+{
+	printf("姓名：%s	学号：%d	年龄：%d\n",curp->name,curp->id,curp->age);
+}
+
+void printLinkedList(struct Student *handp)
+{
+	while(handp!=NULL)
+	{
+		printStudent(handp);
+		handp=handp->next;
+	}
+}
+
+void deleteStudent()
+{
+	printf("请输入该学生学号：");
+	int d;
+	scanf("%d",&d);
+	struct Student *curp=headp;
+	if(curp->id==d)
+	{
+		headp=headp->next;
+		free(curp);
+		curp=NULL;
+	}
+	struct Student *prep=curp;
+	curp=curp->next;
+	while(curp!=NULL)
+	{
+		if(curp->id==d)
+		{
+			struct Student *next=curp->next;
+			prep->next=next;
+			free(curp);
+			curp=NULL;
+			printf("删除完成！\n");
+			return;
+		}
+		else
+		{
+			prep=curp;
+			curp=curp->next;
+		}
+	}
+	printf("查无此人，无法删除！\n");
+}
+
+void addStudent()
+{
+	struct Student *nodep=(struct Student*)malloc(sizeof(struct Student));
+	printf("请输入学号：");
+	scanf("%d",&nodep->id);
+	printf("请输入姓名：");
+	scanf("%s",nodep->name);
+	printf("请输入年龄：");
+	scanf("%d",&nodep->age);
+	if(headp==NULL)
+	{
+		headp=nodep;
+		tailp=nodep;
+	}
+	else
+	{
+		tailp->next=nodep;
+		tailp=nodep;
+	}
+	printf("添加成功！\n");
+}
+
+void findStudent()
+{
+	printf("请输入查询学生姓名：");
+	int d;
+	scanf("%d",&d);
+	int flag=0;
+	struct Student *curp;
+	while(curp!=NULL)
+	{
+		if(curp->id==d)
+		{
+			printStudent(curp);
+			flag=1;
+			break;
+		}
+		else
+		{
+			curp=curp->next;
+		}
+	}
+	if(flag==0)
+	{
+		printf("对不起，查无此人！\n");
+	}
+}
+
+void printAllStudent()
+{
+	if(headp==NULL)
+	{
+		printf("查无此人！\n");
+	}
+	else
+	{
+		printLinkedList(headp);
+	}
+}
+
+int main()
+{
+	printf("****************欢迎使用简易学生查询系统****************\n");
+	printf("删除请按1；\n添加请按2；\n查询请按3；\n显示请按4；\n退出请按5；\n");
+	while(1)
+	{
+		int x;
+		scanf("%d",&x);
+		switch(x)
+		{
+			case 1:
+				deleteStudent();
+				break;
+			case 2:
+				addStudent();
+				break;
+			case 3:
+				findStudent();
+				break;
+			case 4:
+				printAllStudent();
+				break;
+			case 5:
+				exit(0);
+		}
+	}
+	return 0;
+}
