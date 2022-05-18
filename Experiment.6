@@ -1,0 +1,53 @@
+# BooBooWarehouse#include<stdio.h>
+
+struct Country
+{
+	char name[100];
+	int goldNum;
+	int silverNum;
+	int bronzeNum;
+	int totalNum;
+};
+
+typedef struct Country country;
+
+void doubleSort(Country a[],int n)
+{
+	for(int i=0;i<n;i++)
+	{
+		for(int j=0;j<(n-1);j++)
+		{
+			if(a[j].totalNum<a[j+1].totalNum)
+			{
+				country t=a[j];
+				a[j]=a[j+1];
+				a[j+1]=t;
+			}
+		}
+	}
+}
+
+int main()
+{
+	country c[8];
+	FILE* fp=fopen("D:\\test.txt","r");
+	if(fp==NULL)
+	{
+		printf("error!\n");
+	}
+	for(int i=0;i<8;i++)
+	{
+		fscanf(fp,"%s %d %d %d %d",c[i].name,&c[i].goldNum,&c[i].silverNum,&c[i].bronzeNum,&c[i].totalNum);
+	}
+	fclose(fp);
+
+	doubleSort(c,10);
+
+	FILE* outfp=fopen("D:\\new.txt","w");
+	for(int j=0;j<8;j++)
+	{
+		fprintf(outfp,"%s\t%d\t%d\t%d\t%d\n",c[j].name,c[j].goldNum,c[j].silverNum,c[j].bronzeNum,c[j].totalNum);
+	}
+	fclose(outfp);
+	return 0;
+}
