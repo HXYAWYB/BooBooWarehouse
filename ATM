@@ -1,0 +1,278 @@
+# BooBooWarehouse
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+struct Account
+{
+	char name[100];
+	char idCard[19];
+	char password[7];
+	char tel[12];
+	char username[100];//卡号待查询
+	float money;
+	struct Account * next;
+};
+
+typedef struct Account Account;
+
+Account * head=NULL;
+Account * tail=NULL;
+Account * curAccount=NULL;
+Account a;
+
+//找到返回1，找不到返回0
+int findAccount(Account a)
+{
+	Account *curP=head;
+	while(curP!=NULL)
+	{
+		if((strcmp(curP->username,a.username)==0)&&(strcmp(curP->password,a.password)==0))
+		{
+			curAccount = curP;
+			return 1;
+		}
+		curP=curP->next;
+	}
+	return 0;
+}
+
+void updatePassword()
+{
+	char oldPassword[100]={'\0'};
+	printf("请输入旧密码：\n");
+	
+	scanf("%s",oldPassword);
+	if(strcmp(oldPassword,curAccount->password)==0)
+	{
+		printf("请输入新密码：\n");
+		scanf("%s",curAccount->password);
+	}
+	else
+	{
+		printf("密码错误，不能修改！\n");
+	}
+
+}
+
+void showMenu()
+{
+	system("cls");
+	printf("修改密码请按1：\n");
+
+	updatePassword();
+}
+
+void signIn()
+{
+	//三次机会
+    for(int i=0;i<3;i++)
+	{
+		printf("请输入卡号：");
+		scanf("%s",a.username);
+
+		printf("请输入密码：");
+		scanf("%s",a.password);
+
+		if(findAccount(a))
+		{
+			printf("登录成功\n");
+			showMenu();
+			break;
+		}
+		else
+		{
+			printf("登录失败！\n");
+		}
+	}
+}
+
+void signUp()
+{
+	printf("请输入姓名：\n");
+	scanf("%s",a.name);
+
+	printf("请输入身份证号：\n");
+	scanf("%s",a.idCard);
+
+	printf("请输入密码：\n");
+	scanf("%s",a.password);
+
+	printf("请输入电话号码：\n");
+	scanf("%s",a.name);
+
+	printf("请输入卡号：\n");
+	scanf("%s",a.username);
+
+	a.money=0.0f;
+}
+
+void saveData()
+{
+	FILE* fp=fopen("D:/atm.txt","w");
+	if(fp!=NULL)
+	{
+		Account * curP=head;
+		while(curP!=NULL)
+		{
+			fprintf(fp,"%s\t%s\t%s\n",curP->name,curP->username,curP->password);
+			curP=curP->next;
+		}
+		fclose(fp);
+	}
+}
+
+//加载成功返回1，加载失败返回0
+int loadData()
+{
+	FILE* fp=fopen("D:\\atm.txt","r");
+	if(fp==NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		while(!feof(fp))
+		{
+			//创建结点(堆)
+			Account * newNode=(Account *)malloc(sizeof(Account));
+			//结点初始化
+			newNode->next=NULL;
+			fscanf(fp,"%s %s\n",newNode->username,newNode->password);
+
+			//添加结点到链表
+			if(head==NULL)
+			{
+				head=newNode;
+				tail=newNode;
+			}
+			else
+			{
+				tail->next=newNode;
+				tail=newNode;
+			}
+		}
+		saveData();
+		fclose(fp);
+		return 1;
+	}
+}
+
+void printLinkedList()
+{
+	Account* curp=head;
+	while(head!=NULL)
+	{
+		printf("%s\t%s\n",head->username,head->password);
+		head=head->next;
+	}
+}
+
+void EngsignUp()
+{
+	printf("Please enter your name:\n");
+	scanf("%s",a.name);
+
+	printf("Please enter your ID card number:\n");
+	scanf("%s",a.idCard);
+
+	printf("Please enter ypur password:\n");
+	scanf("%s",a.password);
+
+	printf("Please enter your phone number:\n");
+	scanf("%s",a.name);
+
+	printf("Please enter the card number:\n");
+	scanf("%s",a.username);
+
+	a.money=0.0f;
+}
+
+void EngsignIn()
+{
+	//三次机会
+    for(int i=0;i<3;i++)
+	{
+		printf("Please enter the card number:\n");
+		scanf("%s",a.username);
+
+		printf("Please enter the password:\n");
+		scanf("%s",a.password);
+
+		if(findAccount(a))
+		{
+			printf("Login successful!\n");
+			showMenu();
+			break;
+		}
+		else
+		{
+			printf("Login failed!\n");
+		}
+	}
+}
+
+void showChinese()
+{
+	printf("输入1，创建账户\n");
+	printf("输入2，登录\n");
+	int c;
+	scanf("%d",&c);
+	if(c==1)
+	{
+		signUp();
+	}
+	else if(c==2)
+	{
+		signIn();
+	}
+}
+
+void showEnglish()
+{
+	printf("Input 1，sign up\n");
+	printf("Input 2，sign in\n");
+	int c;
+	scanf("%d",&c);
+	if(c==1)
+	{
+		EngsignUp();
+	}
+	else if(c==2)
+	{
+		EngsignIn();
+	}
+}
+
+int main()
+{
+	printf("输入1，选择中文\n");
+	printf("Input 2，Show English\n");
+	char c;
+	scanf("%c",&c);
+	if(c=='1')
+	{
+		showChinese();//显示中文菜单
+	}
+	else if(c=='2')
+	{
+		showEnglish();//显示英文菜单
+	}
+
+
+	int status=loadData();
+	if(status==1)
+	{
+		printf("加载成功!\n");
+	}
+	else
+	{
+		printf("加载失败!\n");
+	}
+
+	printLinkedList();
+
+	signIn();
+
+	return 0;
+}
