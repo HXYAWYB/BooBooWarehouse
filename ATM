@@ -2,252 +2,777 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<time.h>
+#include <windows.h>
+
+struct TransactionRecord
+{
+	char username[100];
+	time_t timestamp;//时间戳	
+	int type;//交易类型 0-取钱，1-存钱，2-转出，3-转入
+	int amount;//数额 
+	
+	struct TransactionRecord * next; 
+}; 
+typedef struct TransactionRecord TR;
+
+TR * trHead=NULL;
+TR * trTail=NULL; 
 
 struct Account
 {
-	char name[100];
-	char idCard[19];
-	char password[7];
-	char tel[12];
-	char username[100];//卡号待查询
+	char username[100];
+    int  idCard[19];
+	char password[100];
+	int tel[12];
 	float money;
-	struct Account * next;
+	int zh;
 };
-
 typedef struct Account Account;
 
-Account * head=NULL;
-Account * tail=NULL;
-Account * curAccount=NULL;
-Account a;
+Account user[1000];
+int  userCount=0;
+ 
+int curAccountIndex;//记录当前账号在user数组中的下标
+int otherAccountIndex;//记录
 
-//找到返回1，找不到返回0
+void showMenu();
+void showChinese();
+
+void showEnglish();
+
+void Transfer();
+
+void findOtherAccount();
+
+int findAccount(Account a);
+
+void saveTransactionRecord();
+void exitsystem();
+
+//找到返回1，否则返回0 
 int findAccount(Account a)
 {
-	Account *curP=head;
-	while(curP!=NULL)
-	{
-		if((strcmp(curP->username,a.username)==0)&&(strcmp(curP->password,a.password)==0))
+	for(int i=0;i<userCount;i++)
+	{	
+		if((user[i].zh==a.zh)&&(strcmp(user[i].password,a.password)==0))
 		{
-			curAccount = curP;
+			curAccountIndex=i;
 			return 1;
 		}
-		curP=curP->next;
 	}
 	return 0;
 }
 
+int findOtherAccount(int otherUsername)
+{
+	for(int i=0;i<userCount;i++)
+	{
+		if(user[i].zh==otherUsername)
+		{
+			otherAccountIndex=i;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+void saveTransactionRecord()
+{
+	FILE* fp=fopen("D:/transation_record.txt","w");
+	TR* curP=trHead;
+	while(curP!=NULL)
+	{
+		fprintf(fp,"%s %ld %d %f\n",curP->username,curP->timestamp,curP->type,curP->amount);
+		curP=curP->next;
+	}
+	fclose(fp);
+}  
+
+void saveData()
+{
+	FILE * fp=fopen("D:/atm.txt","w");
+	for(int i=0;i<userCount;i++)
+	{
+		fprintf(fp,"%d %s %f\n",user[i].zh,user[i].password,user[i].money);
+	}
+	fclose(fp);
+}
+
 void updatePassword()
 {
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                     \t\t\t\t\t欢迎使用!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
 	char oldPassword[100]={'\0'};
-	printf("请输入旧密码：\n");
-	
+	printf("\t\t\t\t\t\t请输入旧密码：");
 	scanf("%s",oldPassword);
-	if(strcmp(oldPassword,curAccount->password)==0)
+
+	int i=0;
+	while(i<2)
 	{
-		printf("请输入新密码：\n");
-		scanf("%s",curAccount->password);
-	}
-	else
-	{
-		printf("密码错误，不能修改！\n");
-	}
-
-}
-
-void showMenu()
-{
-	system("cls");
-	printf("修改密码请按1：\n");
-
-	updatePassword();
-}
-
-void signIn()
-{
-	//三次机会
-    for(int i=0;i<3;i++)
-	{
-		printf("请输入卡号：");
-		scanf("%s",a.username);
-
-		printf("请输入密码：");
-		scanf("%s",a.password);
-
-		if(findAccount(a))
+		if(strcmp(oldPassword,user[curAccountIndex].password)==0)
 		{
-			printf("登录成功\n");
+			printf("\t\t\t\t\t\t请输入新密码：");
+			scanf("%s",user[curAccountIndex].password);
+			printf("\t\t\t\t\t\t修改成功！\n");
+			saveData();
+
+			time_t timestamp=time(NULL);
+            char * ct=ctime(& timestamp);
+            printf("\t\t\t\t\t\t%s\n",ct);
+
+			printf("\t\t\t\t\t\t请按Enter键返回菜单");
+	        system("pause");
 			showMenu();
 			break;
 		}
 		else
 		{
-			printf("登录失败！\n");
+			printf("\t\t\t\t\t\t密码错误，不能修改！\n");
+			i++;
+		}
+	}
+}
+
+void EupdatePassword()
+{
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                     \t\t\t\t\t欢迎使用!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	char oldPassword[100]={'\0'};
+	printf("\t\t\t\t\t\tPlease enter your old password:");
+	scanf("%s",oldPassword);
+	int i=0;
+	while(i<2)
+	{
+		if(strcmp(oldPassword,user[curAccountIndex].password)==0)
+		{
+			printf("\t\t\t\t\t\tPlease enter your new password:");
+			scanf("%s",user[curAccountIndex].password);
+			printf("\t\t\t\t\t\tModify the success!\n");
+			break;
+		}
+		else
+		{
+			printf("\t\t\t\t\t\tThe password incorrect and cannot be changed!\n");
+			i++;
+		}
+	}
+	
+}
+
+void drawMoney()
+{
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                     \t\t\t\t\t欢迎使用!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	int money;
+    printf("\n\t\t\t\t\t\t请输入您的取款金额(整百)：");
+    scanf("%d",&money);
+    if(user[curAccountIndex].money<money)
+	{
+		printf("\n\t\t\t\t\t\t账户余额不足，请重新输入！\n");
+	}
+    else
+	{
+		printf("\n\t\t\t\t\t\t取款成功,请收好您的钞票！\n");
+	}
+	user[curAccountIndex].money-=money;
+	printf("\t\t\t\t\t\t当前余额为:%f\n",user[curAccountIndex].money);
+
+	time_t timestamp=time(NULL);
+    char * ct=ctime(& timestamp);
+	printf("\t\t\t\t\t\t%s\n",ct);
+
+	printf("\t\t\t\t\t\t请按Enter键返回菜单");
+	system("pause");
+	showMenu();
+}
+
+void EdrawMoney()
+{
+printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                     \t\t\t\t\t欢迎使用!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	int money;
+    printf("\t\t\t\t\t\tPlease enter the withdrawal amount:");
+    scanf("%d",&money);
+    if(user[curAccountIndex].money<money)
+	{
+        printf("\t\t\t\t\t\tLack of balance!\n");
+	}
+    else
+	{
+    	printf("\t\t\t\t\t\tWithdrawals success!\n");
+	}
+	user[curAccountIndex].money-=money;
+	printf("\t\t\t\t\t\tThe current balance is:%f\n",user[curAccountIndex].money);
+	
+}
+
+void saveMoney()  
+{
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                     \t\t\t\t\t欢迎使用!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	int money;
+	printf("\n\t\t\t\t\t\t请输入您的存款金额(整百)：");
+	scanf("%d",&money);
+	if(money>10000 || (money%100)!=0)
+	{
+		printf("\n\t\t\t\t\t\t输入有误，请重新输入！\n");
+	}
+	else
+	{
+		printf("\t\t\t\t\t\t存款成功！\n");
+	}
+	user[curAccountIndex].money+=money;
+	printf("\t\t\t\t\t\t当前余额为:%f\n",user[curAccountIndex].money);
+
+	time_t timestamp=time(NULL);
+    char * ct=ctime(& timestamp);
+	printf("\t\t\t\t\t\t%s\n",ct);
+
+	printf("\t\t\t\t\t\t请按Enter键返回菜单");
+	system("pause");
+	showMenu();
+}
+
+void EsaveMoney()
+{
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                     \t\t\t\t\t欢迎使用!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	int money;
+    printf("\t\t\t\t\t\tPlease enter the deposit amount:");
+    scanf("%d", &money);
+	if (money > 10000 ||(money%100)!= 0)
+	{
+		printf("\n\t\t\t\t\t\tInput error,please enter again\n");
+	}
+    else
+	{
+		printf("\t\t\t\t\t\tDeposit successfully!\n");
+	}
+	user[curAccountIndex].money+=money;
+	printf("\t\t\t\t\t\tThe current balance is:%f\n",user[curAccountIndex].money);
+	
+}
+
+void Transfer()
+{
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                     \t\t\t\t\t欢迎使用!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	int otherUsername;
+	//输入对方账户
+	printf("\t\t\t\t\t\t请输入您要转账的银行卡号：");
+	scanf("%d",&otherUsername);
+	//验证账号的合法性
+	if(findOtherAccount(otherUsername))
+	{
+		int money;
+		//输入转账金额
+		printf("\t\t\t\t\t\t请输入您的转账金额：");
+		scanf("%d",&money);
+		//验证金额合法性
+		if((user[curAccountIndex].money)>=money)
+		{
+			//记录转账记录：转出(创建交易记录结点，初始化，添加到链表)
+			TR * newNodeOut=(TR*)malloc(sizeof(TR));
+
+			//转账（原账户的钱减少，对方账户的钱增多）
+			user[curAccountIndex].money-=money;
+			user[otherAccountIndex].money+=money;
+
+			//输出提示转账成功
+			printf("\t\t\t\t\t\t转账成功！\n");
+
+			printf("\t\t\t\t\t\t当前账户余额为%f\n",user[curAccountIndex].money);
+			printf("\t\t\t\t\t\t对方账户余额为%f\n",user[otherAccountIndex].money);
+
+			newNodeOut->next=NULL;
+			strcpy(newNodeOut->username,user[curAccountIndex].username);
+			newNodeOut->type=2;
+			newNodeOut->amount=money;
+			newNodeOut->timestamp=time(NULL);
+			
+			if(trHead==NULL)
+			{
+				trHead=newNodeOut;
+				trTail=newNodeOut; 
+			}
+			else
+			{
+				trTail->next=newNodeOut;
+				trTail=newNodeOut;
+			}
+
+			//记录转账记录：转入
+			TR * newNodeIn=(TR*)malloc(sizeof(TR));
+		
+			newNodeIn->next=NULL;
+			strcpy(newNodeIn->username,user[curAccountIndex].username);
+			newNodeIn->type=3;
+			newNodeIn->amount=money;
+			newNodeIn->timestamp=time(NULL);
+			
+			if(trHead==NULL)
+			{
+				trHead=newNodeIn;
+				trTail=newNodeIn; 
+			}
+			else
+			{
+				trTail->next=newNodeIn;
+				trTail=newNodeIn;
+			}
+		}
+		else
+		{
+			printf("\t\t\t\t\t\t余额不足!\n");
+		}
+	}
+	else
+	{
+		printf("\t\t\t\t\t\t账户错误！\n");
+	}
+	saveTransactionRecord();
+
+	time_t timestamp=time(NULL);
+    char * ct=ctime(& timestamp);
+	printf("\t\t\t\t\t\t%s\n",ct);
+
+	printf("\t\t\t\t\t\t请按Enter键返回菜单");
+	system("pause");
+	showMenu();
+}
+
+void ETransfer()
+{
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                     \t\t\t\t\t欢迎使用!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	int otherUsername;
+	//输入对方账户
+	printf("\t\t\t\t\t\tPlease enter your account:");
+	scanf("%d",&otherUsername);
+	//验证账号的合法性
+	if(findOtherAccount(otherUsername))
+	{
+		int money;
+		//输入转账金额
+		printf("\t\t\t\t\t\tPlease enter the transfer amount:");
+		scanf("%d",&money);
+		//验证金额合法性
+		if((user[curAccountIndex].money)>=money)
+		{
+			//记录转账记录：转出(创建交易记录结点，初始化，添加到链表)
+			TR * newNodeOut=(TR*)malloc(sizeof(TR));
+
+			//转账（原账户的钱减少，对方账户的钱增多）
+			user[curAccountIndex].money-=money;
+			user[otherAccountIndex].money+=money;
+
+			//输出提示转账成功
+			printf("\t\t\t\t\t\ttransfer success!\n");
+
+			printf("\t\t\t\t\t\tThe current balance is:%f\n",user[curAccountIndex].money);
+			printf("\t\t\t\t\t\tThe countryparty balance is:%f\n",user[otherAccountIndex].money);
+
+			newNodeOut->next=NULL;
+			strcpy(newNodeOut->username,user[curAccountIndex].username);
+			newNodeOut->type=2;
+			newNodeOut->amount=money;
+			newNodeOut->timestamp=time(NULL);
+			
+			if(trHead==NULL)
+			{
+				trHead=newNodeOut;
+				trTail=newNodeOut; 
+			}
+			else
+			{
+				trTail->next=newNodeOut;
+				trTail=newNodeOut;
+			}
+
+			//记录转账记录：转入
+			TR * newNodeIn=(TR*)malloc(sizeof(TR));
+		
+			newNodeIn->next=NULL;
+			strcpy(newNodeIn->username,user[curAccountIndex].username);
+			newNodeIn->type=3;
+			newNodeIn->amount=money;
+			newNodeIn->timestamp=time(NULL);
+			
+			if(trHead==NULL)
+			{
+				trHead=newNodeIn;
+				trTail=newNodeIn; 
+			}
+			else
+			{
+				trTail->next=newNodeIn;
+				trTail=newNodeIn;
+			}
+		}
+		else
+		{
+			printf("\t\t\t\t\t\tLack of balance!\n");
+		}
+	}
+	else
+	{
+		printf("\t\t\t\t\t\tAccount error!\n");
+	}
+	
+}
+
+void exitsystem()	//功能6：退出系统
+{
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                     \t\t\t\t\t欢迎使用!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	saveData();
+    printf("\n");
+    printf("\t\t\t\t\t\t交易结束，请取回您的磁卡！\n");
+    system("pause");
+	exit(0);
+}
+
+void showMenu()
+{
+	system("cls");
+	printf("\n");
+    printf("\t\t############################################用户#######################################\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t                           请输入想要实现的功能选项:\n");
+	printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[1] 存款\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[2] 取款\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[3] 转账\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[4] 转账记录\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[5] 修改密码\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[6] 退出系统\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t############################################用户#######################################\n");
+    printf("\n");
+	int i;
+	scanf("%d",&i);
+	switch(i)
+	{
+	    case 1:
+			system("cls");
+			saveMoney();
+			break;
+    	case 2:
+			system("cls");
+			drawMoney();
+			break;
+		case 3:
+			system("cls");
+			Transfer();
+			break;
+		case 4:
+			system("cls");
+			saveTransactionRecord();
+			break;
+		case 5:
+			system("cls");
+			updatePassword();
+			break;
+		case 6:
+			system("cls");
+			exitsystem();
+			break;
+	}
+}
+
+void homePage()
+{
+	system("cls");
+	printf("\n");
+    printf("\t\t############################################用户#######################################\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t                           请输入想要实现的功能选项:\n");
+	printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[1] To save money\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[2] To withdraw money\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[3] Transfer\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[4] Transfer record\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[5] Change the password\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t\t\t\t\t[6] Log out\n");
+    printf("\t\t#						   				       #\n"); 
+    printf("\t\t############################################用户#######################################\n");
+    printf("\n");
+	int i;
+	scanf("%d",&i);
+	switch(i)
+	{
+	    case 1:
+			system("cls");
+			EdrawMoney();
+			break;
+    	case 2:
+			system("cls");
+			EsaveMoney();
+			break;
+		case 3:
+			system("cls");
+			ETransfer();
+			break;
+		case 4:
+			system("cls");
+			saveTransactionRecord();
+			break;
+		case 5:
+			system("cls");
+			EupdatePassword(); 
+			break;
+		case 6:
+			system("cls");
+			exitsystem();
+			break;
+	}
+}
+
+int order=0;
+
+void signIn()
+{
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                    \t\t\t\t\t欢迎登录!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	Account a; 
+	int i=0; 
+	//三次机会
+    while(i<2)
+	{
+
+        printf("\t\t\t\t\t\t请输入账号：");
+		scanf("%d",&a.zh);
+
+		printf("\t\t\t\t\t\t请输入密码：");
+		scanf("%s",a.password);
+
+		printf("\t\t\t\t\t\t正在进行ID认证，请稍后");
+		printf(".");
+		Sleep(400);
+		printf(".");
+		Sleep(400);
+		printf(".");
+		Sleep(400);
+		printf(".");
+
+		if(findAccount(a))
+		{
+			printf("登录成功!\n");
+			Sleep(400);
+			showMenu();
+			break;
+		}
+		else
+		{
+			printf("登录失败!\n");
+			i++;
 		}
 	}
 }
 
 void signUp()
 {
-	printf("请输入姓名：\n");
-	scanf("%s",a.name);
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                    \t\t\t\t\t欢迎注册!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("\t\t\t\t\t\t请输入姓名：");
+	scanf("%s",user[userCount].username);
 
-	printf("请输入身份证号：\n");
-	scanf("%s",a.idCard);
+	printf("\t\t\t\t\t\t请输入身份证号：");
+	scanf("%s",user[userCount].idCard);
 
-	printf("请输入密码：\n");
-	scanf("%s",a.password);
+	printf("\t\t\t\t\t\t请输入密码：");
+	scanf("%s",user[userCount].password);
 
-	printf("请输入电话号码：\n");
-	scanf("%s",a.name);
+	printf("\t\t\t\t\t\t请输入电话号码：");
+	scanf("%s",user[userCount].tel);
 
-	printf("请输入卡号：\n");
-	scanf("%s",a.username);
+    user[userCount].zh = 1000 + userCount;
 
-	a.money=0.0f;
-}
+	printf("\t\t\t\t\t\t恭喜您,开户成功!\n\n\n");
 
-void saveData()
-{
-	FILE* fp=fopen("D:/atm.txt","w");
-	if(fp!=NULL)
-	{
-		Account * curP=head;
-		while(curP!=NULL)
-		{
-			fprintf(fp,"%s\t%s\t%s\n",curP->name,curP->username,curP->password);
-			curP=curP->next;
-		}
-		fclose(fp);
-	}
+	printf("\t\t\t\t\t\t您的账号是：%d\n\n\n\n",user[userCount].zh);
+
+	user[userCount].money=0.0f;
+
+	userCount++;
+	saveData();
+	system("pause");
+	system("cls");
+	signIn();
 }
 
 //加载成功返回1，加载失败返回0
 int loadData()
 {
-	FILE* fp=fopen("D:\\atm.txt","r");
+	FILE* fp=fopen("D:/atm.txt","r");
 	if(fp==NULL)
 	{
-		return 0;
+		return 0; 
 	}
 	else
 	{
 		while(!feof(fp))
 		{
-			//创建结点(堆)
-			Account * newNode=(Account *)malloc(sizeof(Account));
-			//结点初始化
-			newNode->next=NULL;
-			fscanf(fp,"%s %s\n",newNode->username,newNode->password);
-
-			//添加结点到链表
-			if(head==NULL)
-			{
-				head=newNode;
-				tail=newNode;
-			}
-			else
-			{
-				tail->next=newNode;
-				tail=newNode;
-			}
+			fscanf(fp,"%d %s %f\n",&user[userCount].zh,&user[userCount].password,&user[userCount].money);
+			userCount++;
 		}
-		saveData();
-		fclose(fp);
 		return 1;
 	}
-}
 
-void printLinkedList()
-{
-	Account* curp=head;
-	while(head!=NULL)
-	{
-		printf("%s\t%s\n",head->username,head->password);
-		head=head->next;
-	}
-}
-
-void EngsignUp()
-{
-	printf("Please enter your name:\n");
-	scanf("%s",a.name);
-
-	printf("Please enter your ID card number:\n");
-	scanf("%s",a.idCard);
-
-	printf("Please enter ypur password:\n");
-	scanf("%s",a.password);
-
-	printf("Please enter your phone number:\n");
-	scanf("%s",a.name);
-
-	printf("Please enter the card number:\n");
-	scanf("%s",a.username);
-
-	a.money=0.0f;
 }
 
 void EngsignIn()
 {
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                    \t\t\t\t\t欢迎登录!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	Account a; 
+	int i=0;
 	//三次机会
-    for(int i=0;i<3;i++)
+    while(i<2)
 	{
-		printf("Please enter the card number:\n");
+		printf("\t\t\t\t\t\tPlease enter the card number:");
 		scanf("%s",a.username);
 
-		printf("Please enter the password:\n");
+		printf("\t\t\t\t\t\tPlease enter the password:");
 		scanf("%s",a.password);
-
+		printf("\t\t\t\t\t\t正在进行ID认证，请稍后");
+		printf(".");
+		Sleep(400);
+		printf(".");
+		Sleep(400);
+		printf(".");
+		Sleep(400);
+		printf(".");
 		if(findAccount(a))
 		{
 			printf("Login successful!\n");
-			showMenu();
+			homePage();
 			break;
 		}
 		else
 		{
 			printf("Login failed!\n");
+			i++;
 		}
 	}
 }
 
+void EngsignUp()
+{
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("                    \t\t\t\t\t欢迎注册!\n\n");
+	printf("\t\t\t\t\t*******************************************\n\n");
+	printf("\t\t\t\t\t\tPlease enter your name:");
+	scanf("%s",user[userCount].username);
+
+	printf("\t\t\t\t\t\tPlease enter your ID card number:");
+	scanf("%s",user[userCount].idCard);
+
+	printf("\t\t\t\t\t\tPlease enter ypur password:");
+	scanf("%s",user[userCount].password);
+
+	printf("\t\t\t\t\t\tPlease enter your phone number:");
+	scanf("%s",user[userCount].tel);
+
+    user[userCount].zh = 1000 + userCount;
+
+	printf("\t\t\t\t\t\t恭喜您,开户成功!\n\n\n");
+
+	printf("\t\t\t\t\t\t您的账号是：%d\n\n\n\n",user[userCount].zh);
+
+	user[userCount].money=0.0f;
+
+	userCount++;
+	saveData();
+	Sleep(1000);
+	system("cls");
+	EngsignIn();
+}
+
 void showChinese()
 {
-	printf("输入1，创建账户\n");
-	printf("输入2，登录\n");
+	printf("\n\t\t\t\t\t\t输入1，创建账户\n");
+	printf("\n\t\t\t\t\t\t输入2，登录");
 	int c;
 	scanf("%d",&c);
 	if(c==1)
 	{
+		system("cls");
 		signUp();
 	}
 	else if(c==2)
 	{
+		system("cls");
 		signIn();
 	}
 }
 
 void showEnglish()
 {
-	printf("Input 1，sign up\n");
-	printf("Input 2，sign in\n");
+	printf("\t\t\t\t\t\tInput 1，sign up\n");
+	printf("\t\t\t\t\t\tInput 2，sign in");
 	int c;
 	scanf("%d",&c);
 	if(c==1)
 	{
+		system("cls");
 		EngsignUp();
 	}
 	else if(c==2)
 	{
+		system("cls");
 		EngsignIn();
 	}
 }
 
 int main()
 {
-	printf("输入1，选择中文\n");
-	printf("Input 2，Show English\n");
+	printf("\n");
+	printf("\t\t\t\t        *******************************\n");
+	printf("\t\t\t\t        *******************************\n");
+    printf("\n");
+	printf("\t\t\t\t        *     欢迎使用 ATM 柜台机     *\n");
+	printf("\n");
+	printf("\t\t\t\t        *******************************\n");
+	printf("\t\t\t\t        *******************************\n");
+	Sleep(1000);
+	system("cls");
+	int status=loadData();//加载数据
+	if(status==1)
+	{
+		printf("\t\t\t\t\t\t加载成功!\n");
+	}
+	else
+	{
+		printf("\t\t\t\t\t\t加载失败!\n");
+	}
+
+	printf("\t\t\t\t\t\t输入1，选择中文\n");
+	printf("\t\t\t\t\t\tInput 2，Show English");
+	
 	char c;
 	scanf("%c",&c);
 	if(c=='1')
@@ -258,21 +783,15 @@ int main()
 	{
 		showEnglish();//显示英文菜单
 	}
-
-
-	int status=loadData();
-	if(status==1)
+	for(int i=0;i<userCount;i++)
 	{
-		printf("加载成功!\n");
-	}
-	else
-	{
-		printf("加载失败!\n");
+		printf("%d %s\n",user[i].zh,user[i].password);
 	}
 
-	printLinkedList();
+	time_t timestamp=time(NULL);
+    char * ct=ctime(& timestamp);
+    printf("%s\n",ct);
 
-	signIn();
-
+	saveData();
 	return 0;
 }
