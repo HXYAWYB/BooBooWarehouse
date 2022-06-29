@@ -558,7 +558,7 @@ void signIn()
 	Account a; 
 	int i=0; 
 	//三次机会
-    while(i<2)
+    while(i<3)
 	{
 
         printf("\t\t\t\t\t\t请输入账号：");
@@ -651,7 +651,7 @@ void EngsignIn()
 	Account a; 
 	int i=0;
 	//三次机会
-    while(i<2)
+    while(i<3)
 	{
 		printf("\t\t\t\t\t\tPlease enter the card number:");
 		scanf("%s",a.username);
